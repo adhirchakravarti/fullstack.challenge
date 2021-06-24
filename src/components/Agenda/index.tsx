@@ -1,4 +1,10 @@
-import React, { ReactElement, useContext, useMemo } from 'react'
+import React, {
+  ReactElement,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+} from 'react'
 import { DateTime } from 'luxon'
 
 import greeting from 'lib/greeting'
@@ -28,6 +34,16 @@ const compareByDateTime = (a: AgendaItem, b: AgendaItem) =>
 
 const Agenda = (): ReactElement => {
   const account = useContext(AccountContext)
+  const [currentDateTime, setCurrentDateTime] = useState(DateTime.local())
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentDateTime(DateTime.local())
+    }, 1000)
+    return () => {
+      clearInterval(intervalId)
+    }
+  }, [])
 
   const events: AgendaItem[] = useMemo(
     () =>
@@ -39,7 +55,10 @@ const Agenda = (): ReactElement => {
     [account],
   )
 
-  const title = useMemo(() => greeting(DateTime.local().hour), [])
+  const title = useMemo(
+    () => greeting(currentDateTime.hour),
+    [currentDateTime.hour],
+  )
 
   return (
     <div className={style.outer}>
