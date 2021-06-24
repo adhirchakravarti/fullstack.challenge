@@ -6,6 +6,7 @@ import React, {
   useEffect,
 } from 'react'
 import { DateTime } from 'luxon'
+import { v4 as uuid } from 'uuid'
 
 import greeting from 'lib/greeting'
 
@@ -18,6 +19,7 @@ import EventCell from './EventCell'
 
 import style from './style.scss'
 import NotificationBanner from '../NotificationBanner/NotificationBanner'
+import cloneDeep from 'lodash/cloneDeep'
 
 type AgendaItem = {
   calendar: Calendar
@@ -44,6 +46,12 @@ const Agenda = ({
 }: AgendaProps): ReactElement => {
   const account = useContext(AccountContext)
   const [currentDateTime, setCurrentDateTime] = useState(DateTime.local())
+  const [selectedCalendar, setSelectedCalendar] = useState(null)
+  const initialVal = {
+    id: uuid(),
+    name: 'All Calendars',
+    color: '#000',
+  }
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -54,20 +62,79 @@ const Agenda = ({
     }
   }, [])
 
-  const events: AgendaItem[] = useMemo(
-    () =>
-      account.calendars
+  useEffect(() => {
+    setSelectedCalendar(initialVal)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const events: AgendaItem[] = useMemo(() => {
+    if (
+      !selectedCalendar ||
+      (selectedCalendar && selectedCalendar.name === 'All Calendars')
+    ) {
+      return account.calendars
         .flatMap((calendar) =>
           calendar.events.map((event) => ({ calendar, event })),
         )
-        .sort(compareByDateTime),
-    [account],
-  )
+        .sort(compareByDateTime)
+    } else {
+      const calendarIndex = account.calendars.findIndex(
+        (cal) => cal.id === selectedCalendar.id,
+      )
+      if (calendarIndex > -1) {
+        const activeCal = account.calendars[calendarIndex]
+        return activeCal.events
+          .map((event) => ({
+            calendar: activeCal,
+            event,
+          }))
+          .sort(compareByDateTime)
+      }
+    }
+  }, [account.calendars, selectedCalendar])
 
   const title = useMemo(
     () => greeting(currentDateTime.hour),
     [currentDateTime.hour],
   )
+
+  console.log(account, events)
+
+  const calendars = useMemo(() => {
+    if (account && account.calendars) {
+      const initialVal = {
+        id: uuid(),
+        name: 'All Calendars',
+        color: '#000',
+      }
+      const initialOptions = [initialVal]
+      const options = account.calendars.reduce((acc, curr, i) => {
+        const clonedCal = cloneDeep(curr)
+        delete clonedCal.events
+        const newCal = {
+          ...clonedCal,
+          name: `Calendar-${i + 1}`,
+        }
+        return acc.concat(newCal)
+      }, initialOptions)
+      return options
+    } else {
+      return []
+    }
+  }, [account])
+
+  const handleSelectCalendar = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log(e.target.value)
+    const targetCalName = e.target.value
+    const calendarIndex = calendars.findIndex(
+      (cal) => cal.name === targetCalName,
+    )
+    if (calendarIndex > -1) {
+      const newlySelectedCalendar = calendars[calendarIndex]
+      console.log('new active cal = ', newlySelectedCalendar)
+      setSelectedCalendar(newlySelectedCalendar)
+    }
+  }
 
   return (
     <div className={style.outer}>
@@ -77,6 +144,26 @@ const Agenda = ({
       <div className={style.container}>
         <div className={style.header}>
           <span className={style.title}>{title}</span>
+        </div>
+        <div className={style.calendarFilter}>
+          Filter By Calendar
+          {selectedCalendar && (
+            <select
+              className={style.calendarSelect}
+              value={selectedCalendar.name}
+              onChange={handleSelectCalendar}
+            >
+              {calendars.map((cal) => (
+                <option
+                  style={{ color: cal.color }}
+                  key={cal.id}
+                  value={cal.name}
+                >
+                  {cal.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <List>

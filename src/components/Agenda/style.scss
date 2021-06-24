@@ -14,6 +14,8 @@
 
 .container {
   grid-row: 2 / 3;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: fit-content;
   margin-top: 4px;
@@ -35,4 +37,15 @@
 .header {
   @include title-text;
   color: $blackColor;
+}
+
+.calendarFilter {
+  display: block;
+  padding: 16px 0 12px 16px;
+  @include body-medium-text;
+}
+
+.calendarSelect {
+  margin: 0 0 0 1rem;
+  border-radius: 3px;
 }
