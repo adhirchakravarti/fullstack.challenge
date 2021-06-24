@@ -1,0 +1,36 @@
+@import 'lib/style';
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  justify-self: center;
+  align-self: center;
+  padding: 1rem;
+  border-radius: 12px;
+  max-width: 480px;
+  width: -moz-available; /* WebKit-based browsers will ignore this. */
+  width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
+  width: fill-available;
+}
+
+.message {
+  @include body-medium-text;
+  display: flex;
+  // padding: 1rem 0;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 0 1rem;
+}
+
+.acknowledge {
+  @include body-medium-text;
+  // padding: 1rem 0.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}

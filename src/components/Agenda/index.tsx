@@ -17,10 +17,16 @@ import List from './List'
 import EventCell from './EventCell'
 
 import style from './style.scss'
+import NotificationBanner from '../NotificationBanner/NotificationBanner'
 
 type AgendaItem = {
   calendar: Calendar
   event: Event
+}
+
+type AgendaProps = {
+  showNotification: boolean
+  onNotificationDismiss: React.MouseEventHandler<HTMLButtonElement>
 }
 
 const compareByDateTime = (a: AgendaItem, b: AgendaItem) =>
@@ -32,7 +38,10 @@ const compareByDateTime = (a: AgendaItem, b: AgendaItem) =>
  * and list of calendar events
  */
 
-const Agenda = (): ReactElement => {
+const Agenda = ({
+  showNotification,
+  onNotificationDismiss,
+}: AgendaProps): ReactElement => {
   const account = useContext(AccountContext)
   const [currentDateTime, setCurrentDateTime] = useState(DateTime.local())
 
@@ -62,6 +71,9 @@ const Agenda = (): ReactElement => {
 
   return (
     <div className={style.outer}>
+      {showNotification && (
+        <NotificationBanner onDismiss={onNotificationDismiss} />
+      )}
       <div className={style.container}>
         <div className={style.header}>
           <span className={style.title}>{title}</span>

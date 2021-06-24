@@ -8,10 +8,14 @@
   right: 0;
   background: $lightGrayColor;
   padding: 8px;
+  display: grid;
+  grid-template-rows: [notification] 1fr [main-content] minmax(auto, 8fr);
 }
 
 .container {
+  grid-row: 2 / 3;
   width: 100%;
+  height: fit-content;
   margin-top: 4px;
   margin-bottom: 4px;
   background: white;
