@@ -20,6 +20,8 @@ import EventCell from './EventCell'
 import style from './style.scss'
 import NotificationBanner from '../NotificationBanner/NotificationBanner'
 import cloneDeep from 'lodash/cloneDeep'
+import Select from '../Select/Select'
+import CalendarOption from 'src/models/CalendarOption'
 
 type AgendaItem = {
   calendar: Calendar
@@ -100,7 +102,7 @@ const Agenda = ({
 
   console.log(account, events)
 
-  const calendars = useMemo(() => {
+  const calendars: CalendarOption[] = useMemo(() => {
     if (account && account.calendars) {
       const initialVal = {
         id: uuid(),
@@ -148,21 +150,11 @@ const Agenda = ({
         <div className={style.calendarFilter}>
           Filter By Calendar
           {selectedCalendar && (
-            <select
-              className={style.calendarSelect}
-              value={selectedCalendar.name}
+            <Select
+              options={calendars}
+              selectedOption={selectedCalendar}
               onChange={handleSelectCalendar}
-            >
-              {calendars.map((cal) => (
-                <option
-                  style={{ color: cal.color }}
-                  key={cal.id}
-                  value={cal.name}
-                >
-                  {cal.name}
-                </option>
-              ))}
-            </select>
+            />
           )}
         </div>
 
