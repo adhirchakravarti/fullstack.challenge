@@ -9,7 +9,7 @@ import Agenda from './Agenda'
 const REAL_TIME_UPDATES_INTERVAL = 10000
 
 const Application = (): ReactElement => {
-  const [account, refreshAccount, hasError] = useAccount()
+  const [account, refreshAccount, hasError, errorMessage] = useAccount()
   const [showNotification, setShowNotification] = useState(false)
 
   useEffect(
@@ -18,7 +18,6 @@ const Application = (): ReactElement => {
   )
 
   useEffect(() => {
-    console.log('has error = ', hasError)
     if (hasError) {
       setShowNotification(true)
     } else {
@@ -34,6 +33,8 @@ const Application = (): ReactElement => {
     <AccountContext.Provider value={account}>
       <Agenda
         showNotification={showNotification}
+        notificationMessage={errorMessage ? errorMessage : null}
+        hasError={hasError}
         onNotificationDismiss={handleDismissNotification}
       />
     </AccountContext.Provider>

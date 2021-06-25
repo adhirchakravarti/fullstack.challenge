@@ -27,6 +27,8 @@ import style from './style.scss'
 type AgendaProps = {
   showNotification: boolean
   onNotificationDismiss: React.MouseEventHandler<HTMLButtonElement>
+  hasError: boolean
+  notificationMessage: string | null
 }
 
 export const compareByDateTime = (a: AgendaItem, b: AgendaItem): number =>
@@ -41,6 +43,8 @@ export const compareByDateTime = (a: AgendaItem, b: AgendaItem): number =>
 const Agenda = ({
   showNotification,
   onNotificationDismiss,
+  hasError,
+  notificationMessage,
 }: AgendaProps): ReactElement => {
   const account = useContext(AccountContext)
   const [currentDateTime, setCurrentDateTime] = useState(DateTime.local())
@@ -115,7 +119,6 @@ const Agenda = ({
         newDepartments[department].events.push({ calendar, event })
       }
     })
-    console.log(newDepartments)
     return newDepartments
   }, [events])
 
@@ -124,14 +127,10 @@ const Agenda = ({
     groupByDepartments,
   ])
 
-  console.log(memoizedDepartments)
-
   const title = useMemo(
     () => greeting(currentDateTime.hour),
     [currentDateTime.hour],
   )
-
-  console.log(account, events)
 
   const calendars: CalendarOption[] = useMemo(() => {
     if (account && account.calendars) {
@@ -157,14 +156,12 @@ const Agenda = ({
   }, [account])
 
   const handleSelectCalendar = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log(e.target.value)
     const targetCalName = e.target.value
     const calendarIndex = calendars.findIndex(
       (cal) => cal.name === targetCalName,
     )
     if (calendarIndex > -1) {
       const newlySelectedCalendar = calendars[calendarIndex]
-      console.log('new active cal = ', newlySelectedCalendar)
       setSelectedCalendar(newlySelectedCalendar)
     }
   }
@@ -176,7 +173,11 @@ const Agenda = ({
   return (
     <div className={style.outer}>
       {showNotification && (
-        <NotificationBanner onDismiss={onNotificationDismiss} />
+        <NotificationBanner
+          onDismiss={onNotificationDismiss}
+          type={hasError ? 'error' : 'info'}
+          notificationMessage={notificationMessage}
+        />
       )}
       <div className={style.container}>
         <div className={style.header}>

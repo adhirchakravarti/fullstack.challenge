@@ -12,6 +12,7 @@
   width: -moz-available; /* WebKit-based browsers will ignore this. */
   width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
   width: fill-available;
+  border: 1px solid rgba($grayColor, 0.3);
 }
 
 .message {

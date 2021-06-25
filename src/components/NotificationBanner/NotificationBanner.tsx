@@ -3,23 +3,36 @@ import style from './style.scss'
 
 type NotificationBannerProps = {
   onDismiss?: React.MouseEventHandler<HTMLButtonElement>
+  type: string
+  notificationMessage: string
+}
+
+type colorKey = {
+  [key: string]: string
+}
+
+const colorMap: colorKey = {
+  error: '#BD4301',
+  info: '#000066',
 }
 
 const NotificationBanner = ({
   onDismiss,
+  type = 'info',
+  notificationMessage,
 }: NotificationBannerProps): ReactElement => {
   return (
     <div
       className={style.container}
-      style={{ backgroundColor: '#BD4301', color: 'white' }}
+      style={{ backgroundColor: 'white', color: colorMap[type] }}
     >
       <div className={style.message}>
-        Oops we've encountered an error while refreshing the account
+        {`Oops we've encountered an ${notificationMessage.toLowerCase()} while refreshing the account`}
       </div>
       <div className={style.actions}>
         <button
           className={style.acknowledge}
-          style={{ color: 'white' }}
+          style={{ color: colorMap[type] }}
           onClick={onDismiss}
         >
           Dismiss
