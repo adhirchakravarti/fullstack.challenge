@@ -1,0 +1,7 @@
+@import 'lib/style';
+
+.calendarFilter {
+  display: block;
+  padding: 16px 0 12px 16px;
+  @include body-medium-text;
+}

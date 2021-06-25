@@ -8,47 +8,28 @@ import React, {
 } from 'react'
 import { DateTime } from 'luxon'
 import { v4 as uuid } from 'uuid'
+import cloneDeep from 'lodash/cloneDeep'
 
 import greeting from 'lib/greeting'
 
-import Calendar from 'src/models/Calendar'
-import Event from 'src/models/Event'
-import AccountContext from 'src/context/accountContext'
-
-import List from './List'
-import EventCell from './EventCell'
-
-import style from './style.scss'
-import NotificationBanner from '../NotificationBanner/NotificationBanner'
-import cloneDeep from 'lodash/cloneDeep'
-import Select from '../Select/Select'
+import AgendaItem from 'src/models/AgendaItem'
+import DepartmentMap from 'src/models/DepartmentMap'
 import CalendarOption from 'src/models/CalendarOption'
 
-type AgendaItem = {
-  calendar: Calendar
-  event: Event
-}
+import AccountContext from 'src/context/accountContext'
+
+import NotificationBanner from '../NotificationBanner/NotificationBanner'
+import GroupedAgenda from '../GroupedAgenda/GroupedAgenda'
+import FilteredAgenda from '../FilteredAgenda/FilteredAgenda'
+
+import style from './style.scss'
 
 type AgendaProps = {
   showNotification: boolean
   onNotificationDismiss: React.MouseEventHandler<HTMLButtonElement>
 }
 
-type DepartmentList = {
-  department: string
-  events: Event[]
-}
-
-type Department = {
-  name: string
-  events: AgendaItem[]
-}
-
-type DepartmentMap = {
-  [key: string]: Department
-}
-
-const compareByDateTime = (a: AgendaItem, b: AgendaItem) =>
+export const compareByDateTime = (a: AgendaItem, b: AgendaItem): number =>
   a.event.date.diff(b.event.date).valueOf()
 
 /**
@@ -65,13 +46,11 @@ const Agenda = ({
   const [currentDateTime, setCurrentDateTime] = useState(DateTime.local())
   const [selectedCalendar, setSelectedCalendar] = useState(null)
   const [showFilteredAgenda, setShowFilteredAgenda] = useState(true)
-  const [departments, setDeparments] = useState<DepartmentMap>({})
   const initialVal = {
     id: uuid(),
     name: 'All Calendars',
     color: '#000',
   }
-  // const departments: DepartmentMap = {}
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -113,7 +92,7 @@ const Agenda = ({
     }
   }, [account.calendars, selectedCalendar])
 
-  const loadDepartments = useCallback(() => {
+  const groupByDepartments = useCallback(() => {
     const newDepartments: DepartmentMap = {}
     events.forEach((eventItem) => {
       const {
@@ -140,9 +119,9 @@ const Agenda = ({
     return newDepartments
   }, [events])
 
-  const memoizedDepartments = useMemo(loadDepartments, [
+  const memoizedDepartments = useMemo(groupByDepartments, [
     events,
-    loadDepartments,
+    groupByDepartments,
   ])
 
   console.log(memoizedDepartments)
@@ -203,51 +182,19 @@ const Agenda = ({
         <div className={style.header}>
           <span className={style.title}>{title}</span>
           <button className={style.toggleButton} onClick={toggleAgendaView}>
-            View By Department
+            Toggle View
           </button>
         </div>
         {showFilteredAgenda && (
-          <>
-            <div className={style.calendarFilter}>
-              Filter By Calendar
-              {selectedCalendar && (
-                <Select
-                  options={calendars}
-                  selectedOption={selectedCalendar}
-                  onChange={handleSelectCalendar}
-                />
-              )}
-            </div>
-
-            <List>
-              {events.map(({ calendar, event }) => (
-                <EventCell key={event.id} calendar={calendar} event={event} />
-              ))}
-            </List>
-          </>
+          <FilteredAgenda
+            calendarOptions={calendars}
+            selectedCalendar={selectedCalendar}
+            onSelectCalendar={handleSelectCalendar}
+            events={events}
+          />
         )}
         {!showFilteredAgenda && (
-          <>
-            {Object.keys(memoizedDepartments).map((depKey) => {
-              const department = memoizedDepartments[depKey]
-              const { name, events } = department
-              events.sort(compareByDateTime)
-              return (
-                <div>
-                  <span className={style.departmentTitle}>{name}</span>
-                  <List>
-                    {events.map(({ calendar, event }) => (
-                      <EventCell
-                        key={event.id}
-                        calendar={calendar}
-                        event={event}
-                      />
-                    ))}
-                  </List>
-                </div>
-              )
-            })}
-          </>
+          <GroupedAgenda departments={memoizedDepartments} />
         )}
       </div>
     </div>

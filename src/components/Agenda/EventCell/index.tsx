@@ -21,9 +21,10 @@ const formatWhen = (dt: DateTime) => dt.toFormat(dt.minute ? 'h:mm a' : 'h a')
 interface Props {
   calendar: Calendar
   event: Event
+  grouped?: boolean
 }
 
-const EventCell = ({ calendar, event }: Props): ReactElement => {
+const EventCell = ({ calendar, event, grouped }: Props): ReactElement => {
   const cardBgColor = Color(calendar.color).alpha(0.1).string()
   const titleColor = Color(calendar.color)
     .alpha(0.8)
@@ -31,7 +32,7 @@ const EventCell = ({ calendar, event }: Props): ReactElement => {
     .string()
 
   return (
-    <div className={style.outer}>
+    <div className={`${style.outer} ${grouped ? `${style.grouped}` : ''}`}>
       <div className={style.when}>{formatWhen(event.date)}</div>
       <div className={style.card} style={{ backgroundColor: cardBgColor }}>
         <div className={style.cardTitle} style={{ color: titleColor }}>

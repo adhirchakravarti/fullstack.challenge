@@ -10,6 +10,7 @@
   padding: 8px;
   display: grid;
   grid-template-rows: [notification] 1fr [main-content] minmax(auto, 8fr);
+  height: 100%;
 }
 
 .container {
@@ -35,12 +36,6 @@
   justify-content: space-between;
   @include title-text;
   color: $blackColor;
-}
-
-.departmentTitle {
-  @include title-text;
-  color: $blackColor;
-  padding: 12px 16px;
 }
 
 .toggleButton {

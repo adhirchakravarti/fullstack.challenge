@@ -1,0 +1,13 @@
+@import 'lib/style';
+
+.department {
+  padding: 0 32px;
+}
+
+.departmentTitle {
+  @include body-medium-text;
+  display: flex;
+  justify-content: flex-start;
+  color: $blackColor;
+  border-bottom: 1px solid darkgrey;
+}
