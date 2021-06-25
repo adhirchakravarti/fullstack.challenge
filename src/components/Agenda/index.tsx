@@ -50,11 +50,14 @@ const Agenda = ({
   const [currentDateTime, setCurrentDateTime] = useState(DateTime.local())
   const [selectedCalendar, setSelectedCalendar] = useState(null)
   const [showFilteredAgenda, setShowFilteredAgenda] = useState(true)
-  const initialVal = {
-    id: uuid(),
-    name: 'All Calendars',
-    color: '#000',
-  }
+  const initialVal = useMemo(
+    () => ({
+      id: uuid(),
+      name: 'All Calendars',
+      color: '#000',
+    }),
+    [],
+  )
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -134,11 +137,6 @@ const Agenda = ({
 
   const calendars: CalendarOption[] = useMemo(() => {
     if (account && account.calendars) {
-      const initialVal = {
-        id: uuid(),
-        name: 'All Calendars',
-        color: '#000',
-      }
       const initialOptions = [initialVal]
       const options = account.calendars.reduce((acc, curr, i) => {
         const clonedCal = cloneDeep(curr)
@@ -153,7 +151,7 @@ const Agenda = ({
     } else {
       return []
     }
-  }, [account])
+  }, [account, initialVal])
 
   const handleSelectCalendar = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const targetCalName = e.target.value
