@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useState,
   useEffect,
+  useCallback,
 } from 'react'
 import { DateTime } from 'luxon'
 import { v4 as uuid } from 'uuid'
@@ -33,6 +34,20 @@ type AgendaProps = {
   onNotificationDismiss: React.MouseEventHandler<HTMLButtonElement>
 }
 
+type DepartmentList = {
+  department: string
+  events: Event[]
+}
+
+type Department = {
+  name: string
+  events: AgendaItem[]
+}
+
+type DepartmentMap = {
+  [key: string]: Department
+}
+
 const compareByDateTime = (a: AgendaItem, b: AgendaItem) =>
   a.event.date.diff(b.event.date).valueOf()
 
@@ -49,11 +64,14 @@ const Agenda = ({
   const account = useContext(AccountContext)
   const [currentDateTime, setCurrentDateTime] = useState(DateTime.local())
   const [selectedCalendar, setSelectedCalendar] = useState(null)
+  const [showFilteredAgenda, setShowFilteredAgenda] = useState(true)
+  const [departments, setDeparments] = useState<DepartmentMap>({})
   const initialVal = {
     id: uuid(),
     name: 'All Calendars',
     color: '#000',
   }
+  // const departments: DepartmentMap = {}
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -94,6 +112,40 @@ const Agenda = ({
       }
     }
   }, [account.calendars, selectedCalendar])
+
+  const loadDepartments = useCallback(() => {
+    const newDepartments: DepartmentMap = {}
+    events.forEach((eventItem) => {
+      const {
+        event: { department },
+        event,
+        calendar,
+      } = eventItem
+      if (newDepartments[department]) {
+        if (newDepartments[department].events) {
+          newDepartments[department].events.push({ calendar, event })
+        } else {
+          newDepartments[department].events = []
+          newDepartments[department].events.push({ calendar, event })
+        }
+      } else if (department !== undefined && !newDepartments[department]) {
+        newDepartments[department] = {
+          name: department,
+          events: [],
+        }
+        newDepartments[department].events.push({ calendar, event })
+      }
+    })
+    console.log(newDepartments)
+    return newDepartments
+  }, [events])
+
+  const memoizedDepartments = useMemo(loadDepartments, [
+    events,
+    loadDepartments,
+  ])
+
+  console.log(memoizedDepartments)
 
   const title = useMemo(
     () => greeting(currentDateTime.hour),
@@ -138,6 +190,10 @@ const Agenda = ({
     }
   }
 
+  const toggleAgendaView = () => {
+    setShowFilteredAgenda((prevVal) => !prevVal)
+  }
+
   return (
     <div className={style.outer}>
       {showNotification && (
@@ -146,23 +202,53 @@ const Agenda = ({
       <div className={style.container}>
         <div className={style.header}>
           <span className={style.title}>{title}</span>
+          <button className={style.toggleButton} onClick={toggleAgendaView}>
+            View By Department
+          </button>
         </div>
-        <div className={style.calendarFilter}>
-          Filter By Calendar
-          {selectedCalendar && (
-            <Select
-              options={calendars}
-              selectedOption={selectedCalendar}
-              onChange={handleSelectCalendar}
-            />
-          )}
-        </div>
+        {showFilteredAgenda && (
+          <>
+            <div className={style.calendarFilter}>
+              Filter By Calendar
+              {selectedCalendar && (
+                <Select
+                  options={calendars}
+                  selectedOption={selectedCalendar}
+                  onChange={handleSelectCalendar}
+                />
+              )}
+            </div>
 
-        <List>
-          {events.map(({ calendar, event }) => (
-            <EventCell key={event.id} calendar={calendar} event={event} />
-          ))}
-        </List>
+            <List>
+              {events.map(({ calendar, event }) => (
+                <EventCell key={event.id} calendar={calendar} event={event} />
+              ))}
+            </List>
+          </>
+        )}
+        {!showFilteredAgenda && (
+          <>
+            {Object.keys(memoizedDepartments).map((depKey) => {
+              const department = memoizedDepartments[depKey]
+              const { name, events } = department
+              events.sort(compareByDateTime)
+              return (
+                <div>
+                  <span className={style.departmentTitle}>{name}</span>
+                  <List>
+                    {events.map(({ calendar, event }) => (
+                      <EventCell
+                        key={event.id}
+                        calendar={calendar}
+                        event={event}
+                      />
+                    ))}
+                  </List>
+                </div>
+              )
+            })}
+          </>
+        )}
       </div>
     </div>
   )

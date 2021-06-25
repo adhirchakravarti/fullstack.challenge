@@ -30,13 +30,30 @@
 }
 
 .header {
-  display: block;
-  padding: 16px 0 12px 16px;
-}
-
-.header {
+  display: flex;
+  padding: 16px 16px 12px 16px;
+  justify-content: space-between;
   @include title-text;
   color: $blackColor;
+}
+
+.departmentTitle {
+  @include title-text;
+  color: $blackColor;
+  padding: 12px 16px;
+}
+
+.toggleButton {
+  background: none;
+  border: 1px solid #000;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  @include body-medium-text;
+  cursor: pointer;
+
+  &:hover {
+    background-color: lightgray;
+  }
 }
 
 .calendarFilter {
