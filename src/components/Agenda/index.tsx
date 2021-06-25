@@ -103,7 +103,7 @@ const Agenda = ({
     const newDepartments: DepartmentMap = {}
     events.forEach((eventItem) => {
       const {
-        event: { department },
+        event: { department = 'Uncategorized' },
         event,
         calendar,
       } = eventItem
@@ -114,7 +114,7 @@ const Agenda = ({
           newDepartments[department].events = []
           newDepartments[department].events.push({ calendar, event })
         }
-      } else if (department !== undefined && !newDepartments[department]) {
+      } else if (!newDepartments[department]) {
         newDepartments[department] = {
           name: department,
           events: [],
